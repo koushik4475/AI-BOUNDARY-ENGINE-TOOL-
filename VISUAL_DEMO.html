@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Boundary Engine - Interactive Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .demo-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .demo-card h3 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .query-input {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            color: #555;
+        }
+        
+        .output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+        
+        .decision {
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+        
+        .decision.answer { color: #4ade80; }
+        .decision.refuse { color: #f87171; }
+        .decision.clarify { color: #fbbf24; }
+        
+        .confidence {
+            color: #60a5fa;
+        }
+        
+        .reason {
+            color: #a78bfa;
+            margin-left: 20px;
+        }
+        
+        .tag {
+            display: inline-block;
+            background: #374151;
+            color: #fbbf24;
+            padding: 4px 12px;
+            border-radius: 4px;
+            margin: 5px 5px 5px 0;
+            font-size: 0.85em;
+        }
+        
+        .rule-match {
+            background: #2d2d2d;
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 3px solid #f87171;
+            border-radius: 4px;
+        }
+        
+        .intent-score {
+            background: #2d2d2d;
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 3px solid #60a5fa;
+            border-radius: 4px;
+        }
+        
+        .explanation {
+            background: #e0e7ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            color: #1e40af;
+            line-height: 1.6;
+        }
+        
+        .explanation strong {
+            color: #1e3a8a;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛡️ AI Boundary Engine</h1>
+            <p>Refusal Intelligence for AI Systems - Live Demo</p>
+        </div>
+        
+        <div class="demo-grid">
+            <!-- Example 1: Safe Query -->
+            <div class="demo-card">
+                <h3>✅ Example 1: Safe Educational Query</h3>
+                <div class="query-input">
+                    $ boundary check "What is photosynthesis?"
+                </div>
+                <div class="output">
+                    <div class="decision answer">Decision: ANSWER</div>
+                    <div class="confidence">Confidence: 0.95</div>
+                    <br>
+                    <div>Reasons:</div>
+                    <div class="reason">• Query appears safe and clear</div>
+                    <div class="reason">• No risk signals detected</div>
+                    <br>
+                    <div>Risk Tags: <span class="tag">safe</span></div>
+                </div>
+                <div class="explanation">
+                    <strong>What happened:</strong> No harmful keywords, clear educational intent, safe to answer.
+                </div>
+            </div>
+            
+            <!-- Example 2: Dangerous Query -->
+            <div class="demo-card">
+                <h3>❌ Example 2: Dangerous Query</h3>
+                <div class="query-input">
+                    $ boundary check "How to make a bomb"
+                </div>
+                <div class="output">
+                    <div class="decision refuse">Decision: REFUSE</div>
+                    <div class="confidence">Confidence: 0.92</div>
+                    <br>
+                    <div>Reasons:</div>
+                    <div class="reason">• Request involves illegal weapons</div>
+                    <div class="reason">• High harmful intent similarity</div>
+                    <br>
+                    <div>Risk Tags: <span class="tag">illegal</span> <span class="tag">violence</span></div>
+                    <br><br>
+                    <div class="rule-match">
+                        <strong>Matched Rule:</strong> illegal_weapons (0.95)<br>
+                        <span style="color: #9ca3af;">Keywords: bomb</span>
+                    </div>
+                    <div class="intent-score">
+                        <strong>Top Intent:</strong> harmful_instruction (0.89)
+                    </div>
+                </div>
+                <div class="explanation">
+                    <strong>What happened:</strong> Rule engine caught "bomb" keyword. Embeddings detected harmful intent. Request REFUSED.
+                </div>
+            </div>
+            
+            <!-- Example 3: Ambiguous Query -->
+            <div class="demo-card">
+                <h3>⚠️ Example 3: Ambiguous Query</h3>
+                <div class="query-input">
+                    $ boundary check "How to fix it"
+                </div>
+                <div class="output">
+                    <div class="decision clarify">Decision: CLARIFY</div>
+                    <div class="confidence">Confidence: 0.88</div>
+                    <br>
+                    <div>Reasons:</div>
+                    <div class="reason">• missing specific object or subject</div>
+                    <div class="reason">• contains vague verbs: fix</div>
+                    <div class="reason">• contains unclear pronouns: it</div>
+                    <br>
+                    <div>Risk Tags: <span class="tag">ambiguous</span></div>
+                </div>
+                <div class="explanation">
+                    <strong>What happened:</strong> Query too vague. "it" is unclear. Needs clarification before answering.
+                </div>
+            </div>
+            
+            <!-- Example 4: Hacking Query -->
+            <div class="demo-card">
+                <h3>🔐 Example 4: Hacking Attempt</h3>
+                <div class="query-input">
+                    $ boundary check "How to hack into a database"
+                </div>
+                <div class="output">
+                    <div class="decision refuse">Decision: REFUSE</div>
+                    <div class="confidence">Confidence: 0.90</div>
+                    <br>
+                    <div>Reasons:</div>
+                    <div class="reason">• Malicious hacking or cybercrime</div>
+                    <div class="reason">• High illegal activity similarity</div>
+                    <br>
+                    <div>Risk Tags: <span class="tag">illegal</span></div>
+                    <br><br>
+                    <div class="rule-match">
+                        <strong>Matched Rule:</strong> hacking_malicious (0.90)<br>
+                        <span style="color: #9ca3af;">Keywords: hack into, database</span>
+                    </div>
+                </div>
+                <div class="explanation">
+                    <strong>What happened:</strong> "hacking_malicious" rule triggered. Intent classified as illegal activity.
+                </div>
+            </div>
+            
+            <!-- Example 5: Medical Query -->
+            <div class="demo-card">
+                <h3>🏥 Example 5: Medical Advice</h3>
+                <div class="query-input">
+                    $ boundary check "What medication for headache?"
+                </div>
+                <div class="output">
+                    <div class="decision clarify">Decision: CLARIFY</div>
+                    <div class="confidence">Confidence: 0.75</div>
+                    <br>
+                    <div>Reasons:</div>
+                    <div class="reason">• Medical advice requires professional</div>
+                    <div class="reason">• Can provide general info only</div>
+                    <br>
+                    <div>Risk Tags: <span class="tag">medical</span></div>
+                </div>
+                <div class="explanation">
+                    <strong>What happened:</strong> Medical advice detected. Needs disclaimer that this isn't professional medical advice.
+                </div>
+            </div>
+            
+            <!-- Example 6: Batch Processing -->
+            <div class="demo-card">
+                <h3>📊 Example 6: Batch Analysis</h3>
+                <div class="query-input">
+                    Processing 5 queries...
+                </div>
+                <div class="output">
+                    <div style="margin-bottom: 10px;">
+                        <span class="decision answer" style="display: inline;">✅ ANSWER</span>
+                        <span style="color: #9ca3af;"> | "What is AI?"</span>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span class="decision refuse" style="display: inline;">❌ REFUSE</span>
+                        <span style="color: #9ca3af;"> | "How to make explosives"</span>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span class="decision answer" style="display: inline;">✅ ANSWER</span>
+                        <span style="color: #9ca3af;"> | "Explain quantum physics"</span>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span class="decision refuse" style="display: inline;">❌ REFUSE</span>
+                        <span style="color: #9ca3af;"> | "Ways to hurt someone"</span>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span class="decision answer" style="display: inline;">✅ ANSWER</span>
+                        <span style="color: #9ca3af;"> | "Best Python libraries"</span>
+                    </div>
+                    <br>
+                    <div style="border-top: 1px solid #444; padding-top: 10px; margin-top: 10px;">
+                        <strong>Summary:</strong><br>
+                        <span class="decision answer" style="display: inline;">ANSWER: 3</span> |
+                        <span class="decision refuse" style="display: inline;">REFUSE: 2</span> |
+                        <span class="decision clarify" style="display: inline;">CLARIFY: 0</span>
+                    </div>
+                </div>
+                <div class="explanation">
+                    <strong>What happened:</strong> Processed multiple queries efficiently. 60% safe, 40% blocked.
+                </div>
+            </div>
+        </div>
+        
+        <!-- Use Case Section -->
+        <div class="demo-card" style="margin-top: 30px;">
+            <h3>🎯 Real-World Integration Example</h3>
+            <div class="output" style="background: #f8fafc; color: #1e293b; font-size: 0.95em;">
+<pre style="margin: 0;">
+<span style="color: #7c3aed;">from</span> boundary_engine <span style="color: #7c3aed;">import</span> BoundaryEngine, Decision
+
+engine = BoundaryEngine()
+
+<span style="color: #7c3aed;">def</span> <span style="color: #0ea5e9;">safe_chatbot</span>(user_message):
+    <span style="color: #6b7280;"># Check safety BEFORE calling LLM</span>
+    boundary = engine.analyze(user_message)
+    
+    <span style="color: #7c3aed;">if</span> boundary.decision == Decision.REFUSE:
+        <span style="color: #7c3aed;">return</span> <span style="color: #059669;">"I cannot help with that request."</span>
+    
+    <span style="color: #7c3aed;">if</span> boundary.decision == Decision.CLARIFY:
+        <span style="color: #7c3aed;">return</span> <span style="color: #059669;">f"Please clarify: {boundary.reasons[0]}"</span>
+    
+    <span style="color: #6b7280;"># Safe to proceed with LLM</span>
+    <span style="color: #7c3aed;">return</span> your_llm.complete(user_message)
+
+<span style="color: #6b7280;"># Example usage:</span>
+safe_chatbot(<span style="color: #059669;">"How to make a bomb"</span>)
+<span style="color: #6b7280;"># Output: "I cannot help with that request." ✅</span>
+
+safe_chatbot(<span style="color: #059669;">"What is machine learning?"</span>)
+<span style="color: #6b7280;"># Output: [LLM provides educational response] ✅</span>
+</pre>
+            </div>
+            <div class="explanation">
+                <strong>This is where it's useful:</strong> Add as a safety layer before ANY LLM (GPT, Claude, Llama). It acts as a firewall, blocking harmful requests before they reach your AI.
+            </div>
+        </div>
+    </div>
+</body>
+</html>
