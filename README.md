@@ -1,6 +1,9 @@
 <div align="center">
 
-# 🛡️ AI Boundary Engine
+# AI Boundary Engine | Python LLM Safety Filter for Prompt Risk Classification
+
+AI Boundary Engine is a Python-based AI safety component that evaluates an input prompt before it reaches a language model. It uses semantic similarity and risk signals to classify requests, provide refusal decisions, and attach explanatory risk tags. The project is relevant to developers building LLM applications, prompt gateways, and layered content-safety workflows; treat its output as one defense layer, not a complete safety guarantee.
+
 
 <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=22&duration=3000&pause=1000&color=6366F1&center=true&vCenter=true&width=435&lines=AI+Safety+Layer;Refusal+Intelligence;Model-Agnostic+Protection;Zero+API+Costs" alt="Typing SVG" />
 
