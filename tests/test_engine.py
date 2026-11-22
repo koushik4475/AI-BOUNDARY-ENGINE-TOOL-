@@ -21,6 +21,26 @@ class TestBoundaryEngine:
         assert result.decision == Decision.ANSWER
         assert result.confidence > 0.5
         assert RiskTag.SAFE in result.risk_tags
+
+    def test_query_normalization_preserves_non_ascii_text(self):
+        """Normalization must preserve queries written in non-ASCII scripts."""
+        engine = BoundaryEngine.__new__(BoundaryEngine)
+
+        normalized = engine._normalize_query("  नमस्ते 世界  ")
+
+        assert normalized.text == "नमस्ते 世界"
+        assert normalized.original == "  नमस्ते 世界  "
+        assert normalized.length == len("नमस्ते 世界")
+        assert normalized.tokens == 2
+
+    def test_query_normalization_composes_unicode_and_collapses_whitespace(self):
+        """Unicode normalization should compose accents without losing text."""
+        engine = BoundaryEngine.__new__(BoundaryEngine)
+
+        normalized = engine._normalize_query("  cafe\u0301   au   lait  ")
+
+        assert normalized.text == "café au lait"
+        assert normalized.original == "  cafe\u0301   au   lait  "
     
     def test_illegal_query_refuse(self, engine):
         """Test that illegal queries get REFUSE decision."""
