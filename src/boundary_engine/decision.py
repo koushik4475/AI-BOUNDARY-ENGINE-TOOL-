@@ -56,8 +56,8 @@ class DecisionAggregator:
         clarify_signals = self._get_clarify_signals(rule_matches, ambiguity)
         
         # Calculate confidence scores
-        refuse_confidence = self._calculate_refuse_confidence(refuse_signals, intent_scores)
-        clarify_confidence = self._calculate_clarify_confidence(clarify_signals, ambiguity)
+        refuse_confidence = self._calculate_refuse_confidence(refuse_signals, intent_scores, rule_matches)
+        clarify_confidence = self._calculate_clarify_confidence(clarify_signals, ambiguity, rule_matches)
         
         # Make decision (priority order)
         if refuse_confidence >= self.refuse_threshold:
@@ -137,22 +137,18 @@ class DecisionAggregator:
     def _calculate_refuse_confidence(
         self,
         refuse_signals: List[str],
-        intent_scores: List[IntentScore]
+        intent_scores: List[IntentScore],
+        rule_matches: List[RuleMatch]
     ) -> float:
         """Calculate confidence for REFUSE decision."""
         if not refuse_signals:
             return 0.0
         
-        # Weight different signal types
-        rule_weight = 0.6
-        intent_weight = 0.4
-        
-        # Count signal types
-        rule_signals = [s for s in refuse_signals if s.startswith("rule:")]
-        intent_signals = [s for s in refuse_signals if s.startswith("intent:")]
-        
-        # Calculate weighted score
-        rule_score = min(len(rule_signals) * 0.3, 1.0) if rule_signals else 0.0
+        # Preserve the confidence assigned by the matching safety rule.
+        rule_score = max(
+            (match.confidence for match in rule_matches if match.decision == Decision.REFUSE),
+            default=0.0
+        )
         
         # Get max intent similarity for harmful intents
         intent_score = 0.0
@@ -166,13 +162,13 @@ class DecisionAggregator:
                 default=0.0
             )
         
-        confidence = (rule_weight * rule_score) + (intent_weight * intent_score)
-        return min(confidence, 1.0)
+        return max(rule_score, intent_score)
     
     def _calculate_clarify_confidence(
         self,
         clarify_signals: List[str],
-        ambiguity: AmbiguityResult
+        ambiguity: AmbiguityResult,
+        rule_matches: List[RuleMatch]
     ) -> float:
         """Calculate confidence for CLARIFY decision."""
         if not clarify_signals:
@@ -184,8 +180,11 @@ class DecisionAggregator:
         # Add ambiguity score
         ambiguity_score = ambiguity.score * 0.4
         
-        confidence = signal_score + ambiguity_score
-        return min(confidence, 1.0)
+        rule_score = max(
+            (match.confidence for match in rule_matches if match.decision == Decision.CLARIFY),
+            default=0.0
+        )
+        return min(max(rule_score, signal_score + ambiguity_score), 1.0)
     
     def _build_refuse_reasons(
         self,
