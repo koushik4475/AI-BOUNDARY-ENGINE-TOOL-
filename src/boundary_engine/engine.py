@@ -123,9 +123,9 @@ class BoundaryEngine:
         if not isinstance(query, str):
             raise TypeError("Query must be a string")
 
-        # Normalize Unicode without discarding non-ASCII characters. Removing
+        # Normalize Unicode canonically without discarding non-ASCII characters. Removing
         # them can erase non-English requests before the safety checks run.
-        text = unicodedata.normalize("NFKC", query).strip()
+        text = unicodedata.normalize("NFC", query).strip()
         if not text:
             raise ValueError("Query cannot be empty")
 
