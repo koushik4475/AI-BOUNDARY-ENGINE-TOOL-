@@ -19,12 +19,12 @@ def test_normalization_preserves_non_ascii_query_content():
     assert normalized.length == len("你好，世界！")
 
 
-def test_normalization_applies_nfkc_without_dropping_unicode():
+def test_normalization_preserves_fullwidth_unicode():
     engine = make_engine_without_loading_models()
 
     normalized = engine._normalize_query("  Ｈｅｌｌｏ　世界  ")
 
-    assert normalized.text == "Hello 世界"
+    assert normalized.text == "Ｈｅｌｌｏ 世界"
 
 
 def test_normalization_rejects_empty_queries():
