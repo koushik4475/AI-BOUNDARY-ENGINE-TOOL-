@@ -3,6 +3,7 @@ Main boundary engine orchestrator.
 """
 
 import re
+import unicodedata
 from typing import Optional, List, Dict
 from .types import (
     NormalizedQuery, DecisionResult, EngineConfig, Rule
@@ -122,8 +123,9 @@ class BoundaryEngine:
         # Strip whitespace
         text = query.strip()
         
-        # Normalize unicode
-        text = text.encode('ascii', 'ignore').decode('ascii')
+        # Normalize Unicode without dropping non-ASCII characters.
+        # ASCII-only filtering corrupts queries written in other languages.
+        text = unicodedata.normalize('NFC', text)
         
         # Normalize whitespace
         text = re.sub(r'\s+', ' ', text)
